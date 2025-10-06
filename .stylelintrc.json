@@ -1,0 +1,54 @@
+{
+    "extends": [
+        "stylelint-config-standard"
+    ],
+    "rules": {
+        "at-rule-no-unknown": [
+            true,
+            {
+                "ignoreAtRules": [
+                    "tailwind",
+                    "apply",
+                    "variants",
+                    "responsive",
+                    "screen",
+                    "layer"
+                ]
+            }
+        ],
+        "property-no-unknown": [
+            true,
+            {
+                "ignoreProperties": [
+                    "composes",
+                    "backdrop-filter",
+                    "accent-color"
+                ]
+            }
+        ],
+        "selector-class-pattern": null,
+        "custom-property-pattern": null,
+        "declaration-block-no-redundant-longhand-properties": null,
+        "shorthand-property-no-redundant-values": null,
+        "color-function-notation": null,
+        "alpha-value-notation": null,
+        "hue-degree-notation": null,
+        "color-hex-length": null,
+        "color-function-alias-notation": null,
+        "media-feature-range-notation": null,
+        "selector-pseudo-element-colon-notation": null,
+        "no-descending-specificity": null,
+        "no-duplicate-selectors": null,
+        "keyframes-name-pattern": null,
+        "rule-empty-line-before": null,
+        "function-no-unknown": [
+            true,
+            {
+                "ignoreFunctions": [
+                    "theme",
+                    "screen"
+                ]
+            }
+        ]
+    }
+}

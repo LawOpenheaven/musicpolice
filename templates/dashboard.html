@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Police - AI Compliance Dashboard</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h2>Music Police</h2>
+            </div>
+            
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="user-info">
+                    <h3>AI Compliance</h3>
+                    <p>Engine Administrator</p>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item active">
+                    <a href="#dashboard">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#compliance">
+                        <i class="fas fa-gavel"></i>
+                        <span>Compliance</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#uploads">
+                        <i class="fas fa-upload"></i>
+                        <span>Upload</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#reports">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/api-monitor" target="_blank" class="external-link">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>API Monitor</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <h1 id="page-title">Daily Analysis</h1>
+                    <p class="subtitle" id="page-subtitle">"Only photograph what you love." — Tim Walker</p>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search analyses by filename..." id="search-input">
+                        <button class="search-clear" id="search-clear-btn" onclick="clearSearch()" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <button class="btn-primary" id="analyze-btn">
+                        <i class="fas fa-plus"></i>
+                        Analyze
+                    </button>
+                </div>
+            </header>
+
+            <!-- Analysis Table -->
+            <section class="analysis-table">
+                <div class="table-controls">
+                    <div class="table-title">
+                        <h3>Recent Analyses</h3>
+                        <span class="analysis-count" id="analysis-count">Loading...</span>
+                    </div>
+                    <div class="table-actions">
+                        <button class="btn-secondary" id="view-all-btn" onclick="showAllAnalyses()">
+                            <i class="fas fa-list"></i>
+                            View All
+                        </button>
+                        <button class="btn-secondary" id="refresh-analyses-btn" onclick="refreshAnalyses()">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="table-header">
+                    <div class="col">CONTENT TYPE</div>
+                    <div class="col">RATING</div>
+                    <div class="col">STATUS</div>
+                    <div class="col">DETAILS</div>
+                    <div class="col">DATE</div>
+                </div>
+                <div id="analysis-table-body">
+                    <!-- Dynamic table rows will be inserted here -->
+                </div>
+                <div class="table-pagination" id="table-pagination" style="display: none;">
+                    <button class="btn-secondary" id="prev-page-btn" onclick="changePage(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                        Previous
+                    </button>
+                    <span class="page-info" id="page-info">Page 1 of 1</span>
+                    <button class="btn-secondary" id="next-page-btn" onclick="changePage(1)">
+                        Next
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <!-- Compliance Metrics -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Compliance Score</h3>
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                    <div class="circular-progress">
+                        <div class="progress-circle" data-percentage="0">
+                            <span class="percentage">0%</span>
+                        </div>
+                        <div class="progress-circle" data-percentage="0">
+                            <span class="percentage">0%</span>
+                        </div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>Copyright</span>
+                        <span>Bias Detection</span>
+                    </div>
+                </div>
+
+                <!-- Detection Metrics -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Current Analysis Queue</h3>
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                    <div class="metric-list">
+                        <div class="metric-item">
+                            <span class="metric-label">0</span>
+                            <div class="metric-bar">
+                                <div class="bar-fill" style="width: 0%"></div>
+                            </div>
+                            <span class="metric-score">Total Analyses</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">0</span>
+                            <div class="metric-bar">
+                                <div class="bar-fill" style="width: 0%"></div>
+                            </div>
+                            <span class="metric-score">Recent Analyses</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">0</span>
+                            <div class="metric-bar">
+                                <div class="bar-fill" style="width: 0%"></div>
+                            </div>
+                            <span class="metric-score">Avg Compliance</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">0</span>
+                            <div class="metric-bar">
+                                <div class="bar-fill" style="width: 0%"></div>
+                            </div>
+                            <span class="metric-score">Issues Found</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Trends -->
+                <div class="stat-card chart-card">
+                    <div class="stat-header">
+                        <h3>Analysis Trends</h3>
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                    <div class="big-number">0</div>
+                    <div class="chart-container">
+                        <canvas id="trendsChart"></canvas>
+                    </div>
+                    <div class="chart-legend">
+                        <span class="legend-item">
+                            <span class="legend-dot primary"></span>
+                            Processed
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section (default) -->
+            <div id="dashboard-section" class="content-section active">
+                <!-- Content is already above -->
+            </div>
+
+            <!-- Compliance Section -->
+            <div id="compliance-section" class="content-section">
+                <div class="section-header">
+                    <h2>Compliance Rules Management</h2>
+                    <p>Configure and manage compliance rules for content analysis</p>
+                </div>
+                
+                <div class="rules-grid">
+                    <div class="rule-card">
+                        <div class="rule-header">
+                            <h3>Copyright Detection</h3>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="copyright-toggle" checked>
+                                <label for="copyright-toggle"></label>
+                            </div>
+                        </div>
+                        <div class="rule-content">
+                            <p>Detects potential copyright infringement in audio content</p>
+                            <div class="rule-setting">
+                                <label>Similarity Threshold:</label>
+                                <input type="range" id="similarity-threshold" min="0.1" max="1.0" step="0.1" value="0.7">
+                                <span id="threshold-value">0.7</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rule-card">
+                        <div class="rule-header">
+                            <h3>Bias Detection</h3>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="bias-toggle" checked>
+                                <label for="bias-toggle"></label>
+                            </div>
+                        </div>
+                        <div class="rule-content">
+                            <p>Analyzes content for potential bias and discrimination</p>
+                            <div class="rule-setting">
+                                <label>Toxicity Threshold:</label>
+                                <input type="range" id="bias-threshold" min="0.1" max="1.0" step="0.1" value="0.4">
+                                <span id="bias-threshold-value">0.4</span>
+                            </div>
+                            <div class="rule-categories">
+                                <label>Categories to check:</label>
+                                <div class="checkbox-group">
+                                    <label><input type="checkbox" checked> Gender</label>
+                                    <label><input type="checkbox" checked> Race</label>
+                                    <label><input type="checkbox" checked> Age</label>
+                                    <label><input type="checkbox"> Religion</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rule-card">
+                        <div class="rule-header">
+                            <h3>Content Filtering</h3>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="content-toggle" checked>
+                                <label for="content-toggle"></label>
+                            </div>
+                        </div>
+                        <div class="rule-content">
+                            <p>Filters explicit and inappropriate content</p>
+                            <div class="rule-categories">
+                                <label>Filter types:</label>
+                                <div class="checkbox-group">
+                                    <label><input type="checkbox" checked> Explicit Language</label>
+                                    <label><input type="checkbox" checked> Hate Speech</label>
+                                    <label><input type="checkbox"> Violence</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" id="save-rules-btn">
+                        <i class="fas fa-save"></i>
+                        Save Rules
+                    </button>
+                    <button class="btn-secondary" id="reset-rules-btn">
+                        <i class="fas fa-undo"></i>
+                        Reset to Default
+                    </button>
+                </div>
+            </div>
+
+            <!-- Upload Section -->
+            <div id="uploads-section" class="content-section">
+                <div class="section-header">
+                    <h2>Content Upload & Analysis</h2>
+                    <p>Upload audio files for compliance analysis</p>
+                </div>
+
+                <div class="upload-container">
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h3>Drop files here or click to browse</h3>
+                            <p>Supported formats: MP3, WAV, FLAC, M4A, OGG</p>
+                            <input type="file" id="file-input" multiple accept=".mp3,.wav,.flac,.m4a,.ogg" style="display: none;">
+                            <button class="btn-primary" id="browse-btn">
+                                <i class="fas fa-folder-open"></i>
+                                Browse Files
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="upload-options">
+                        <h4>Analysis Options</h4>
+                        <div class="option-group">
+                            <label><input type="checkbox" id="copyright-analysis" checked> Copyright Detection</label>
+                            <label><input type="checkbox" id="bias-analysis" checked> Bias Detection</label>
+                            <label><input type="checkbox" id="content-analysis" checked> Content Filtering</label>
+                        </div>
+                        <div class="option-group">
+                            <label>Priority Level:</label>
+                            <select id="priority-select">
+                                <option value="low">Low</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="upload-queue" id="upload-queue" style="display: none;">
+                    <h4>Upload Queue</h4>
+                    <div class="queue-list" id="queue-list"></div>
+                    <button class="btn-primary" id="start-analysis-btn">
+                        <i class="fas fa-play"></i>
+                        Start Analysis
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reports-section" class="content-section">
+                <div class="section-header">
+                    <h2>Analysis Reports</h2>
+                    <p>View and export detailed analysis reports</p>
+                </div>
+
+                <div class="reports-filters">
+                    <div class="filter-group">
+                        <label>Date Range:</label>
+                        <input type="date" id="start-date">
+                        <input type="date" id="end-date">
+                    </div>
+                    <div class="filter-group">
+                        <label>Analysis Type:</label>
+                        <select id="report-type-filter">
+                            <option value="all">All Types</option>
+                            <option value="copyright">Copyright</option>
+                            <option value="bias">Bias Detection</option>
+                            <option value="content">Content Filter</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select id="status-filter">
+                            <option value="all">All Status</option>
+                            <option value="completed">Completed</option>
+                            <option value="processing">Processing</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" id="generate-report-btn">
+                        <i class="fas fa-chart-bar"></i>
+                        Generate Report
+                    </button>
+                </div>
+
+                <div class="reports-grid">
+                    <div class="report-card">
+                        <div class="report-header">
+                            <h3>Compliance Summary</h3>
+                            <span class="report-date">Last 30 days</span>
+                        </div>
+                        <div class="report-metrics">
+                            <div class="metric">
+                                <span class="metric-value">1,243</span>
+                                <span class="metric-label">Total Analyses</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">94.2%</span>
+                                <span class="metric-label">Compliance Rate</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-value">87</span>
+                                <span class="metric-label">Issues Found</span>
+                            </div>
+                        </div>
+                        <button class="btn-secondary">
+                            <i class="fas fa-download"></i>
+                            Export PDF
+                        </button>
+                    </div>
+
+                    <div class="report-card">
+                        <div class="report-header">
+                            <h3>Trend Analysis</h3>
+                            <span class="report-date">Last 7 days</span>
+                        </div>
+                        <div class="trend-chart">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                        <button class="btn-secondary">
+                            <i class="fas fa-download"></i>
+                            Export CSV
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings-section" class="content-section">
+                <div class="section-header">
+                    <h2>System Settings</h2>
+                    <p>Configure system preferences and notifications</p>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>General Settings</h3>
+                        <div class="setting-item">
+                            <label>Default Analysis Priority:</label>
+                            <select id="default-priority">
+                                <option value="low">Low</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Auto-delete Uploads After:</label>
+                            <select id="auto-delete">
+                                <option value="1">1 day</option>
+                                <option value="7" selected>7 days</option>
+                                <option value="30">30 days</option>
+                                <option value="never">Never</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="email-notifications" checked>
+                                Email notifications for completed analyses
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>API Settings</h3>
+                        <div class="setting-item">
+                            <label>API Rate Limit (requests/minute):</label>
+                            <input type="number" id="rate-limit" value="100" min="1" max="1000">
+                        </div>
+                        <div class="setting-item">
+                            <label>Max File Size (MB):</label>
+                            <input type="number" id="max-file-size" value="100" min="1" max="500">
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="api-logging" checked>
+                                Enable API request logging
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Security Settings</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="require-auth" checked>
+                                Require authentication for uploads
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="encrypt-files" checked>
+                                Encrypt uploaded files
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>Session Timeout (minutes):</label>
+                            <input type="number" id="session-timeout" value="60" min="5" max="480">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" id="save-settings-btn">
+                        <i class="fas fa-save"></i>
+                        Save Settings
+                    </button>
+                    <button class="btn-secondary" id="reset-settings-btn">
+                        <i class="fas fa-undo"></i>
+                        Reset to Default
+                    </button>
+                    <button class="btn-danger" id="clear-cache-btn">
+                        <i class="fas fa-trash"></i>
+                        Clear Cache
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Lyrics Popup Modal -->
+    <div id="lyrics-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Song Lyrics</h3>
+                <span class="close" onclick="closeLyricsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="lyrics-content">
+                    <p>Loading lyrics...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="copyLyrics()">
+                    <i class="fas fa-copy"></i>
+                    Copy Lyrics
+                </button>
+                <button class="btn-primary" onclick="closeLyricsModal()">
+                    <i class="fas fa-times"></i>
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Details Modal -->
+    <div id="analysis-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Analysis Details</h3>
+                <span class="close" onclick="closeAnalysisModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="analysis-content">
+                    <p>Loading analysis details...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeAnalysisModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/dashboard.js"></script>
+    <script src="/static/bias-similarity-visualization.js"></script>
+</body>
+</html>
+
+

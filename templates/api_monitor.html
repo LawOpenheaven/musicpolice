@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎼 Music Police - API Monitor</title>
+    <link rel="stylesheet" href="/static/dashboard.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* API Monitor Specific Styles */
+        .api-monitor-container {
+            margin-left: 280px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .monitor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #2a2d3a;
+        }
+
+        .monitor-title {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .monitor-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn.active {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(79, 172, 254, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(79, 172, 254, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 172, 254, 0); }
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        select, input {
+            padding: 0.5rem;
+            border: 1px solid #2a2d3a;
+            border-radius: 6px;
+            background: #1a1d29;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        select option {
+            background: #1a1d29;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #232740;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #2a2d3a;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #8892b0;
+            font-size: 0.9rem;
+        }
+
+        .api-calls-section {
+            background: #232740;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #2a2d3a;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .call-item {
+            background: #1a1d29;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+            border: 1px solid #2a2d3a;
+        }
+
+        .call-item:hover {
+            background: #232740;
+            transform: translateX(5px);
+        }
+
+        .call-item.error {
+            border-left-color: #f5576c;
+        }
+
+        .call-item.success {
+            border-left-color: #4facfe;
+        }
+
+        .call-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .method {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .method.get { background: #4facfe; }
+        .method.post { background: #f093fb; }
+        .method.put { background: #f5576c; }
+        .method.delete { background: #ff6b6b; }
+
+        .path {
+            font-family: 'Courier New', monospace;
+            color: #8892b0;
+            flex-grow: 1;
+            margin: 0 1rem;
+            font-size: 0.9rem;
+        }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .status.success { background: #4facfe; }
+        .status.error { background: #f5576c; }
+        .status.processing { background: #f093fb; }
+
+        .call-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            color: #8892b0;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            background: rgba(245, 87, 108, 0.2);
+            border: 1px solid #f5576c;
+            color: #f5576c;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #2a2d3a;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #4facfe;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(26px);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #667eea;
+            text-decoration: none;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #4facfe;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h2>Music Police</h2>
+            </div>
+            
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="user-info">
+                    <h3>API Monitor</h3>
+                    <p>Real-time Monitoring</p>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="/" class="external-link">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="/upload" class="external-link">
+                        <i class="fas fa-upload"></i>
+                        <span>Upload</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="#monitor">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>API Monitor</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="api-monitor-container">
+            <a href="/" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+            </a>
+
+            <div class="monitor-header">
+                <h1 class="monitor-title">🎼 API Monitor</h1>
+                <div class="monitor-controls">
+                    <button class="btn" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                    <button class="btn" id="auto-refresh-btn" onclick="toggleAutoRefresh()">
+                        <i class="fas fa-pause" id="auto-refresh-icon"></i>
+                        <span id="auto-refresh-text">Auto-refresh</span>
+                    </button>
+                    <button class="btn danger" onclick="clearHistory()">
+                        <i class="fas fa-trash"></i>
+                        Clear History
+                    </button>
+                    
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select id="status-filter" onchange="filterCalls()">
+                            <option value="">All</option>
+                            <option value="completed">Completed</option>
+                            <option value="processing">Processing</option>
+                            <option value="error">Error</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>Limit:</label>
+                        <input type="number" id="limit-input" value="50" min="1" max="200" onchange="filterCalls()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-grid" id="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-calls">0</div>
+                    <div class="stat-label">Total Calls</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="success-calls">0</div>
+                    <div class="stat-label">Successful</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="error-calls">0</div>
+                    <div class="stat-label">Errors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avg-time">0ms</div>
+                    <div class="stat-label">Avg Response Time</div>
+                </div>
+            </div>
+
+            <div class="api-calls-section">
+                <h2 class="section-title">Recent API Calls</h2>
+                <div id="calls-container">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Loading API calls...
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let autoRefreshInterval = null;
+        let isAutoRefresh = false;
+
+        async function fetchApiCalls() {
+            try {
+                const status = document.getElementById('status-filter').value;
+                const limit = document.getElementById('limit-input').value;
+                
+                let url = `/debug/api-calls?limit=${limit}`;
+                if (status) {
+                    url += `&status=${status}`;
+                }
+                
+                // Show loading indicator
+                const container = document.getElementById('calls-container');
+                if (!isAutoRefresh) {
+                    container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading API calls...</div>';
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                updateStats(data);
+                displayCalls(data.calls);
+                
+            } catch (error) {
+                showError('Failed to fetch API calls: ' + error.message);
+            }
+        }
+
+        function updateStats(data) {
+            const totalCalls = data.total_calls;
+            const calls = data.calls;
+            
+            const successCalls = calls.filter(call => call.status === 'completed').length;
+            const errorCalls = calls.filter(call => call.status === 'error').length;
+            
+            const avgTime = calls.length > 0 
+                ? Math.round(calls.reduce((sum, call) => sum + (call.processing_time || 0) * 1000, 0) / calls.length)
+                : 0;
+            
+            document.getElementById('total-calls').textContent = totalCalls;
+            document.getElementById('success-calls').textContent = successCalls;
+            document.getElementById('error-calls').textContent = errorCalls;
+            document.getElementById('avg-time').textContent = avgTime + 'ms';
+        }
+
+        function displayCalls(calls) {
+            const container = document.getElementById('calls-container');
+            
+            if (calls.length === 0) {
+                container.innerHTML = '<div class="loading">No API calls found</div>';
+                return;
+            }
+            
+            container.innerHTML = calls.map(call => {
+                const request = call.request;
+                const response = call.response;
+                const status = call.status;
+                
+                const statusClass = status === 'error' ? 'error' : 
+                                  status === 'completed' ? 'success' : 'processing';
+                
+                const methodClass = request.method.toLowerCase();
+                
+                return `
+                    <div class="call-item ${statusClass}">
+                        <div class="call-header">
+                            <span class="method ${methodClass}">${request.method}</span>
+                            <span class="path">${request.path}</span>
+                            <span class="status ${statusClass}">${status}</span>
+                        </div>
+                        <div class="call-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Request ID:</span>
+                                <span>${request.request_id}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Timestamp:</span>
+                                <span>${new Date(request.timestamp).toLocaleString()}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Client IP:</span>
+                                <span>${request.client_ip}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Processing Time:</span>
+                                <span>${call.processing_time ? (call.processing_time * 1000).toFixed(2) + 'ms' : 'N/A'}</span>
+                            </div>
+                            ${response ? `
+                                <div class="detail-item">
+                                    <span class="detail-label">Status Code:</span>
+                                    <span>${response.status_code || 'N/A'}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showError(message) {
+            const container = document.getElementById('calls-container');
+            container.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        function refreshData() {
+            fetchApiCalls();
+        }
+
+        function filterCalls() {
+            fetchApiCalls();
+        }
+
+        function toggleAutoRefresh() {
+            isAutoRefresh = !isAutoRefresh;
+            const button = document.getElementById('auto-refresh-btn');
+            const icon = document.getElementById('auto-refresh-icon');
+            const text = document.getElementById('auto-refresh-text');
+            
+            if (isAutoRefresh) {
+                text.textContent = 'Stop Auto-refresh';
+                icon.className = 'fas fa-play';
+                button.classList.add('active');
+                autoRefreshInterval = setInterval(fetchApiCalls, 3000); // 3 seconds instead of 2
+            } else {
+                text.textContent = 'Auto-refresh';
+                icon.className = 'fas fa-pause';
+                button.classList.remove('active');
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                    autoRefreshInterval = null;
+                }
+            }
+        }
+
+        async function clearHistory() {
+            if (!confirm('Are you sure you want to clear all API call history?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/debug/api-calls', {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    alert(data.message);
+                    refreshData();
+                }
+            } catch (error) {
+                showError('Failed to clear history: ' + error.message);
+            }
+        }
+
+        // Initial load
+        fetchApiCalls();
+    </script>
+</body>
+</html>
