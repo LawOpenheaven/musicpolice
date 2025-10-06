@@ -370,7 +370,6 @@ FINAL_STATUS.md
 database_setup.md
 APP_WORKFLOW_EXPLANATION.md
 API_MONITORING_GUIDE.md
-README.md
 
 # Exclude setup and utility files
 complete_setup.py
