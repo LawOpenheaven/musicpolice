@@ -1,16 +1,31 @@
+# Core FastAPI and web framework dependencies
 fastapi>=0.104.1
 uvicorn[standard]>=0.24.0
-sqlalchemy>=2.0.23
-psycopg2-binary>=2.9.9
-alembic>=1.12.1
-librosa>=0.10.1
-numpy>=1.26.0
-pandas>=2.1.0
-transformers>=4.35.2
-torch>=2.1.0
 python-multipart>=0.0.6
 jinja2>=3.1.2
 aiofiles>=23.2.0
+
+# Database dependencies
+sqlalchemy>=2.0.23
+psycopg2-binary>=2.9.9
+alembic>=1.12.1
+
+# Configuration and validation
 pydantic>=2.5.0
+pydantic-settings>=2.0.0
 python-dotenv>=1.0.0
+
+# Audio processing and machine learning
+librosa>=0.10.1
+numpy>=1.26.0
+pandas>=2.1.0
+scipy>=1.11.0
+soundfile>=0.12.1
+
+# AI/ML models and transformers
+transformers>=4.35.2
+torch>=2.1.0
 openai-whisper>=20231117
+
+# Additional utilities
+pathlib2>=2.3.7; python_version < "3.4"
